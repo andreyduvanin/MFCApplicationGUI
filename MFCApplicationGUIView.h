@@ -19,14 +19,17 @@ public:
 
 // Операции
 public:
-	unsigned char inBuffer[1240];
-
+	unsigned char echoBuffer[1240];
+	unsigned char echoBufold[1240];
+	int recvMsgSize;
 
 protected:
 // Переопределение
 public:
 	virtual void OnDraw(CDC* pDC);  // переопределено для отрисовки этого представления
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	void ProcessPendingRead();
+
 // Реализация
 
 public:

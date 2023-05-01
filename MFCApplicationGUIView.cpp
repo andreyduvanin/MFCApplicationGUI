@@ -29,16 +29,18 @@ BEGIN_MESSAGE_MAP(CMFCApplicationGUIView, CView)
 END_MESSAGE_MAP()
 
 // Создание или уничтожение CMFCApplicationGUIView
+unsigned char echoBuffer[1240];
+//CMFCApplicationGUIView* param1;
 
 
 UINT ThreadFunction(LPVOID param)
 {
-	DWORD result = 0;
+  cout << "******************ThreadFunction() - It works!" << endl;
+  CMFCApplicationGUIView* param1 = (CMFCApplicationGUIView*)param;
+		DWORD result = 0;
 	UINT exitCode = 0;
 	CSocket echoServer;
-
-
-	cout << "Cudp2Socket() - It works!" << endl;
+	
 	AfxSocketInit(NULL);
 
 	// Create socket for sending/receiving datagrams
@@ -50,39 +52,24 @@ UINT ThreadFunction(LPVOID param)
 	// Set the size of the in-out parameter
 	int clntAddrLen = sizeof(echoClntAddr);
 	// Buffer for echo string
-
-	unsigned char echoBuffer[1240];
-
-	//param = (LPVOID)echoBuffer;
-
-	unsigned int iechoBuffer[1240];
 	// Block until receive message from a client
-	int recvMsgSize = 0;
-	int i = 0;
+
+	int recvMsgSize_ = 0;
 	int buflen = 1240;
 	for (;;)
 	{
-
-		recvMsgSize = 0;
-		recvMsgSize = echoServer.ReceiveFrom(param, buflen, (SOCKADDR*)&echoClntAddr, &clntAddrLen, 0);
-		memcpy(echoBuffer, param, 1024);
-		if (recvMsgSize < 0)
+		buflen = 1240;
+		recvMsgSize_ = 0;
+		recvMsgSize_ = echoServer.ReceiveFrom(param1->echoBuffer, buflen, (SOCKADDR*)&echoClntAddr, &clntAddrLen, 0);
+		if (recvMsgSize_ < 0)
 		{
 			AfxMessageBox(L"RecvFrom() failed", MB_OK | MB_ICONSTOP);
 		}
-		if (recvMsgSize)
+
+		if (recvMsgSize_)
 		{
-			echoBuffer[recvMsgSize] = 0;
-			cout << recvMsgSize << "  " << i++ << endl;
-			for (int n = 0; n < 1024; n++)
-			{
-				iechoBuffer[n] = echoBuffer[n];
-				cout << (unsigned int)iechoBuffer[n] << " ";
-			}
-			cout << endl;
-			//				cout << echoBuffer  << endl;
-			//				cout <<  "echoServer.ReceiveFrom - It works!" << endl;
-			//				AfxMessageBox(L"RecvFrom() ", MB_OK | MB_ICONSTOP);
+			param1->recvMsgSize = recvMsgSize_;
+		  param1->ProcessPendingRead();
 		}
 		Sleep(10);
 	}
@@ -90,12 +77,34 @@ UINT ThreadFunction(LPVOID param)
 	return result;
 }
 
+void CMFCApplicationGUIView::ProcessPendingRead()
+{
+
+	CClientDC dc(this);
+	POINT point,poold;
+	CWnd* pWnd = dc.GetWindow();
+	RECT RectWnd;
+	pWnd->GetClientRect(&RectWnd);
+
+	int gor  = RectWnd.right  - 20;
+	int vert = RectWnd.bottom - 20;
+	for (int n = 0; n < 1024; n++)
+	{
+		point.x = n / 1024. * gor + 10.;
+		poold.x = n / 1024. * gor + 10.;
+		point.y = vert - (echoBuffer[n] / 250. * vert);
+		poold.y = vert - (echoBufold[n] / 250. * vert);
+		dc.SetPixel(poold, 0x00FFFFFF);
+		dc.SetPixel(point, 0x00000000);
+	}
+	memcpy(echoBufold, echoBuffer, 1024);
+}
 
 CMFCApplicationGUIView::CMFCApplicationGUIView() noexcept
 {
+//	param1 = this;
 	CWinThread* pThread;
-	LPVOID data = (LPVOID)inBuffer[0];
-	pThread = AfxBeginThread(ThreadFunction, &data);
+	pThread = AfxBeginThread(ThreadFunction, this, THREAD_PRIORITY_HIGHEST);
 }
 
 CMFCApplicationGUIView::~CMFCApplicationGUIView()
@@ -118,12 +127,14 @@ void CMFCApplicationGUIView::OnDraw(CDC* pDC)
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
 		return;
-
+	ProcessPendingRead();
+	return;
+	/*
 	POINT point;
 	COLORREF crColor = 0;
 	point.x = 0;
 	point.y = 0;
-	/*
+	
 	const int nrolls = 10000;  // number of experiments
 	const int nstars = 1000;    // maximum number of stars to distribute
 
@@ -145,11 +156,8 @@ void CMFCApplicationGUIView::OnDraw(CDC* pDC)
 		std::cout << p[i] * nstars / nrolls;
 		std::cout << std::string(p[i] * nstars / nrolls, '*') << std::endl;
 	}
-	*/
-	unsigned char echoBuffer[1240];
-	memcpy(echoBuffer, inBuffer, 1024);
 
-	for (int i = 0; i < 55; i++)
+	for (int i = 0; i < 25; i++)
 	{
 		cout << (unsigned int)echoBuffer[i] << " ";
 	}
@@ -169,7 +177,7 @@ void CMFCApplicationGUIView::OnDraw(CDC* pDC)
 //		pDC->TextOutW(point.x, point.y, dist6(rng));
 	}
 	cout << endl;
-
+	*/
 //pDoc->
 	{
 	}
