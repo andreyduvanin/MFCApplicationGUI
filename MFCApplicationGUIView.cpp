@@ -31,13 +31,71 @@ END_MESSAGE_MAP()
 // Создание или уничтожение CMFCApplicationGUIView
 
 
+UINT ThreadFunction(LPVOID param)
+{
+	DWORD result = 0;
+	UINT exitCode = 0;
+	CSocket echoServer;
+
+
+	cout << "Cudp2Socket() - It works!" << endl;
+	AfxSocketInit(NULL);
+
+	// Create socket for sending/receiving datagrams
+	if (echoServer.Create(514, SOCK_DGRAM, NULL) == 0)
+	{
+		AfxMessageBox(L"Create() failed", MB_OK | MB_ICONSTOP);
+	}
+	SOCKADDR_IN echoClntAddr;
+	// Set the size of the in-out parameter
+	int clntAddrLen = sizeof(echoClntAddr);
+	// Buffer for echo string
+
+	unsigned char echoBuffer[1240];
+
+	//param = (LPVOID)echoBuffer;
+
+	unsigned int iechoBuffer[1240];
+	// Block until receive message from a client
+	int recvMsgSize = 0;
+	int i = 0;
+	int buflen = 1240;
+	for (;;)
+	{
+
+		recvMsgSize = 0;
+		recvMsgSize = echoServer.ReceiveFrom(param, buflen, (SOCKADDR*)&echoClntAddr, &clntAddrLen, 0);
+		memcpy(echoBuffer, param, 1024);
+		if (recvMsgSize < 0)
+		{
+			AfxMessageBox(L"RecvFrom() failed", MB_OK | MB_ICONSTOP);
+		}
+		if (recvMsgSize)
+		{
+			echoBuffer[recvMsgSize] = 0;
+			cout << recvMsgSize << "  " << i++ << endl;
+			for (int n = 0; n < 1024; n++)
+			{
+				iechoBuffer[n] = echoBuffer[n];
+				cout << (unsigned int)iechoBuffer[n] << " ";
+			}
+			cout << endl;
+			//				cout << echoBuffer  << endl;
+			//				cout <<  "echoServer.ReceiveFrom - It works!" << endl;
+			//				AfxMessageBox(L"RecvFrom() ", MB_OK | MB_ICONSTOP);
+		}
+		Sleep(10);
+	}
+	AfxEndThread(exitCode);
+	return result;
+}
+
+
 CMFCApplicationGUIView::CMFCApplicationGUIView() noexcept
 {
-	// TODO: добавьте код создания
-	printf("\nHello world!\n");
-	std::cout << "It works!" << endl;
-	std::cout << "это по русски!ЭТО ПО РУССКИ - THIS IS CYRILLIC" << endl;
-	pCudp2Socket = new Cudp2Socket();
+	CWinThread* pThread;
+	LPVOID data = (LPVOID)inBuffer[0];
+	pThread = AfxBeginThread(ThreadFunction, &data);
 }
 
 CMFCApplicationGUIView::~CMFCApplicationGUIView()
@@ -88,6 +146,14 @@ void CMFCApplicationGUIView::OnDraw(CDC* pDC)
 		std::cout << std::string(p[i] * nstars / nrolls, '*') << std::endl;
 	}
 	*/
+	unsigned char echoBuffer[1240];
+	memcpy(echoBuffer, inBuffer, 1024);
+
+	for (int i = 0; i < 55; i++)
+	{
+		cout << (unsigned int)echoBuffer[i] << " ";
+	}
+
 	for(unsigned int i = 0; i < 750; i++)
 	{
 		random_device dev;

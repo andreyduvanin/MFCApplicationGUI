@@ -7,7 +7,7 @@
 
 using namespace std;
 #define ECHOMAX 1024;
-
+/*
 UINT ThreadFunction(LPVOID param)
 {
 		DWORD result = 0;
@@ -48,7 +48,7 @@ UINT ThreadFunction(LPVOID param)
 				for (int n = 0; n < 1024; n++)
 				{
 					iechoBuffer[n] = echoBuffer[n];
-					cout << (unsigned int)iechoBuffer[n] << " ";
+					cout << echoBuffer[n] << " ";
 				}
 				cout << endl;
 //				cout << echoBuffer  << endl;
@@ -59,13 +59,13 @@ UINT ThreadFunction(LPVOID param)
 		}
 		AfxEndThread(exitCode);
 		return result;
-}
-
-Cudp2Socket::Cudp2Socket()
-{
-	CWinThread* pThread;
+}	CWinThread* pThread;
 	LPVOID data = 0;
 	pThread = AfxBeginThread(ThreadFunction, &data);
+
+*/
+Cudp2Socket::Cudp2Socket()
+{
 }
 
 Cudp2Socket::~Cudp2Socket()

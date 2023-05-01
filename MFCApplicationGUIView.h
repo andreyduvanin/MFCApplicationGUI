@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "Cudp2Socket.h"
+//#include "Cudp2Socket.h"
 
 
 class CMFCApplicationGUIView : public CView
@@ -15,10 +15,12 @@ protected: // создать только из сериализации
 // Атрибуты
 public:
 	CMFCApplicationGUIDoc* GetDocument() const;
-	Cudp2Socket* pCudp2Socket;
+//	Cudp2Socket* pCudp2Socket;
 
 // Операции
 public:
+	unsigned char inBuffer[1240];
+
 
 protected:
 // Переопределение
