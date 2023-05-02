@@ -68,6 +68,7 @@ UINT ThreadFunction(LPVOID param)
 
 		if (recvMsgSize_)
 		{
+			cout << recvMsgSize_ << endl;
 			param1->recvMsgSize = recvMsgSize_;
 		  param1->ProcessPendingRead();
 		}
@@ -79,7 +80,17 @@ UINT ThreadFunction(LPVOID param)
 
 void CMFCApplicationGUIView::ProcessPendingRead()
 {
-
+	real_1d_array x;
+	real_1d_array y;
+	x.setlength(256);
+	y.setlength(256);
+	for (int i=0;i<256;i++)
+	{
+		x[i] = i;
+		y[i] = echoBuffer[i];
+	}
+	spline1dinterpolant s;
+	spline1dbuildcubic(x, y, s);
 	CClientDC dc(this);
 	POINT point,poold;
 	CWnd* pWnd = dc.GetWindow();
@@ -88,16 +99,32 @@ void CMFCApplicationGUIView::ProcessPendingRead()
 
 	int gor  = RectWnd.right  - 20;
 	int vert = RectWnd.bottom - 20;
-	for (int n = 0; n < 1024; n++)
+	double xn=0, xo = 0, dx = 1;
+	double yn, yo = 0, dy = 1;
+	double tanu = 1;
+	while (xn < 255)
 	{
-		point.x = n / 1024. * gor + 10.;
-		poold.x = n / 1024. * gor + 10.;
-		point.y = vert - (echoBuffer[n] / 250. * vert);
-		poold.y = vert - (echoBufold[n] / 250. * vert);
-		dc.SetPixel(poold, 0x00FFFFFF);
+		xn = xo + dx;
+		yn = spline1dcalc(s, xn);
+		dy = abs(yn - yo);
+		dx = xn - xo;
+		if (dy > dx)
+		{
+			dx /= dy;
+		}
+		else
+		{
+			point.x = xo / 256. * gor + 10.;
+			point.y = vert - yo / 256. * vert;
+			dc.SetPixel(point, 0x00FFFFFF);
+		}
+		yo = yn;
+		xo = xn;
+		point.x = xn / 256. * gor + 10.;
+		point.y = vert - yn / 256. * vert;
 		dc.SetPixel(point, 0x00000000);
 	}
-	memcpy(echoBufold, echoBuffer, 1024);
+//	memcpy(echoBufold, echoBuffer, 256);
 }
 
 CMFCApplicationGUIView::CMFCApplicationGUIView() noexcept

@@ -4,7 +4,8 @@
 
 #pragma once
 //#include "Cudp2Socket.h"
-
+#include "interpolation.h"
+using namespace alglib;
 
 class CMFCApplicationGUIView : public CView
 {
